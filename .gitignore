@@ -10,6 +10,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# heavy_files
+server/data/
+
 ### dotenv ###
 .env
 
@@ -280,5 +283,7 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+.vscode
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,python,react,git,dotenv

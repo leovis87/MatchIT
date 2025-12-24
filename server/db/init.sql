@@ -23,11 +23,17 @@ CREATE TABLE Users (
     UserID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     Name VARCHAR(100),
     Email VARCHAR(255) UNIQUE NOT NULL,
+    RoleID INT NOT NULL DEFAULT 1,  -- 1 = user
     CareerLevelID INT,
+    RangeID INT,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_users_role
+        FOREIGN KEY (RoleID) REFERENCES Roles(RoleID),
     CONSTRAINT fk_users_careerlevel
-        FOREIGN KEY (CareerLevelID) REFERENCES CareerLevels(CareerLevelID)
+        FOREIGN KEY (CareerLevelID) REFERENCES CareerLevels(CareerLevelID),
+    CONSTRAINT fk_users_experienceranges
+        FOREIGN KEY (RangeID) REFERENCES ExperienceRanges(RangeID)
 );
 
 -- UpdatedAt 자동 갱신 트리거(옵션: MySQL의 ON UPDATE CURRENT_TIMESTAMP 대체용)
@@ -140,6 +146,7 @@ CREATE TABLE JobPosts (
     CloseDate DATE,
     ViewCount INT DEFAULT 0,
     Url VARCHAR(500),
+    Embeded VECTOR(768),
     IsActive BOOLEAN DEFAULT TRUE,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -184,6 +191,7 @@ CREATE TABLE BootcampPosts (
     RegistrationDate DATE,
     CloseDate DATE,
     DetailUrl VARCHAR(500),
+    Embeded VECTOR(768),
     ViewCount INT DEFAULT 0,
     CreatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     UpdatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -247,3 +255,10 @@ CREATE TABLE ExperienceRanges (
 
 -- CareerLevels에 RangeID 추가
 ALTER TABLE CareerLevels ADD COLUMN ExperienceRangeID INT REFERENCES ExperienceRanges(RangeID);
+
+
+-- 역할 (관리자/유저)
+CREATE TABLE Roles (
+    RoleID INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    RoleName VARCHAR(50) UNIQUE NOT NULL
+);

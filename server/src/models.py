@@ -1,16 +1,17 @@
 from src.database import Base
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from typing import List, Optional
 from sqlalchemy import (
     Column, Integer, String, Boolean, Date, DateTime, Text,
     ForeignKey, UniqueConstraint, CheckConstraint, Index, func
 )
+from pgvector.sqlalchemy import Vector
 from sqlalchemy.orm import declarative_base, relationship
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 # Base = declarative_base()
-
+KST = timezone(timedelta(hours = 9))
 
 # -------------------------------------------------------
 # CareerLevels
@@ -35,6 +36,7 @@ class ExperienceRange(Base):
     MinYears = Column("minyears", Integer, nullable=True)
     MaxYears = Column("maxyears", Integer, nullable=True)
 
+    users = relationship("User", back_populates="experience_range")
     def to_dict(self):
         return {
             "id": self.RangeID,
@@ -42,6 +44,18 @@ class ExperienceRange(Base):
             "min_years": self.MinYears,
             "max_years": self.MaxYears,
         }
+
+
+# -------------------------------------------------------
+# Roles
+# -------------------------------------------------------
+class Role(Base):
+    __tablename__ = "roles"
+
+    RoleID = Column("roleid", Integer, primary_key=True)
+    Name = Column("rolename", String(50), unique=True, nullable=False)
+
+    users = relationship("User", back_populates="role")
 
 
 # -------------------------------------------------------
@@ -53,13 +67,16 @@ class User(Base):
     UserID = Column("userid", Integer, primary_key=True, autoincrement=True)
     Name = Column("name", String(100))
     Email = Column("email", String(255), unique=True, nullable=True)
+    RoleID = Column("roleid", Integer, ForeignKey("roles.roleid"), default=1)
     CareerLevelID = Column("careerlevelid", Integer, ForeignKey("careerlevels.careerlevelid"))
+    RangeID = Column("rangeid", Integer, ForeignKey("experienceranges.rangeid"), nullable=True)
     # ExperienceRangeID = Column("experiencerangeid", Integer, ForeignKey("experienceranges.rangeid"), nullable=True)
     CreatedAt = Column("createdat", DateTime(timezone=True), server_default=func.now())
     UpdatedAt = Column("updatedat", DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
+    role = relationship("Role", back_populates="users")
     career_level = relationship("CareerLevel", back_populates="users")
-    # experience_range = relationship("ExperienceRange")
+    experience_range = relationship("ExperienceRange", back_populates="users", foreign_keys=[RangeID])
     social_logins = relationship("SocialLogin", back_populates="user")
     desired_jobs = relationship("DesiredJob", secondary="userdesiredjobs", back_populates="users")
     skills = relationship("Skill", secondary="userskills", back_populates="users")
@@ -159,7 +176,6 @@ class Platform(Base):
 # -------------------------------------------------------
 # JobCategories
 # -------------------------------------------------------
-# 이 값을 못가져옴....
 class JobCategory(Base):
     __tablename__ = "jobcategories"
 
@@ -199,6 +215,7 @@ class JobPost(Base):
     CloseDate = Column("closedate", Date)
     ViewCount = Column("viewcount", Integer, default=0)
     Url = Column("url", String(500))
+    Embeded = Column('embeded', Vector(768), nullable = True)
     IsActive = Column("isactive", Boolean, default=True)
     CreatedAt = Column("createdat", DateTime(timezone=True), server_default=func.now())
     UpdatedAt = Column("updatedat", DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -242,6 +259,7 @@ class BootcampPost(Base):
     RegistrationDate = Column("registrationdate", Date)
     CloseDate = Column("closedate", Date)
     DetailUrl = Column("detailurl", String(500))
+    Embeded = Column('embeded', Vector(768), nullable = True)
     ViewCount = Column("viewcount", Integer, default=0)
     CreatedAt = Column("createdat", DateTime(timezone=True), server_default=func.now())
     UpdatedAt = Column("updatedat", DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

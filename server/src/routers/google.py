@@ -119,19 +119,19 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
 
             if not user:
                 user = User(
-                    Email=google_email if google_email else f"google_{google_id}@no-email.com",
-                    Name=google_name,
+                    Email = google_email if google_email else f"google_{google_id}@no-email.com",
+                    Name = google_name,
                 )
                 db.add(user)
                 db.flush()
                 newly_created = True
 
             new_oauth = SocialLogin(
-                UserID=user.UserID,
-                Provider="Google",
-                ProviderUserID=str(google_id),
-                LinkedAt=datetime.now(),
-                UnlinkedAt=None,
+                UserID = user.UserID,
+                Provider = "Google",
+                ProviderUserID = str(google_id),
+                LinkedAt = datetime.now(),
+                UnlinkedAt = None,
             )
             db.add(new_oauth)
 
@@ -150,11 +150,11 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
         expires_at = datetime.now() + timedelta(seconds=expires_in)
 
         session = UserSession(
-            SessionID=session_id,
-            UserID=user.UserID,
-            AccessToken=access_token,
-            RefreshToken=refresh_token,
-            ExpiresAt=expires_at,
+            SessionID = session_id,
+            UserID = user.UserID,
+            AccessToken = access_token,
+            RefreshToken = refresh_token,
+            ExpiresAt = expires_at,
         )
         db.add(session)
         db.commit()
@@ -188,10 +188,10 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
     response = HTMLResponse(html)
 
     cookie_opt = dict(
-        httponly=True,
-        secure=False,
-        samesite="lax",
-        path="/",
+        httponly = True,
+        secure = False,
+        samesite = "lax",
+        path = "/",
     )
 
     response.set_cookie("session_id", str(session_id), max_age=60 * 60 * 24 * 30, **cookie_opt)
@@ -201,10 +201,10 @@ async def google_callback(code: str, db: Session = Depends(get_db)):
     response.set_cookie(
         "is_login",
         "true",
-        httponly=False,
-        secure=False,
-        samesite="lax",
-        path="/",
+        httponly = False,
+        secure = False,
+        samesite = "lax",
+        path = "/",
     )
 
     return response
@@ -240,9 +240,17 @@ async def get_current_user(
     if not user:
         return {"isLoggedIn": False, "user": None}
 
+    # role 정보 로드
+    db.refresh(user, ["role"])
+
     return {
         "isLoggedIn": True,
-        "user": {"id": user.UserID, "name": user.Name, "email": user.Email},
+        "user": {
+            "id": user.UserID,
+            "name": user.Name,
+            "email": user.Email,
+            "role": user.role.Name if user.role else "user",
+        },
     }
 
 

@@ -76,9 +76,14 @@ services:
       DB_PASSWORD: password
       DB_NAME: matchit_db
       DB_PORT: 5432
+      LORA_MODEL_PATH: /app/ai/models/checkpoint-460   #/app/ai/models/gemma2-job-lora-final
     depends_on:
       - postgres
       - redis
+    gpus: all         # Docker Compose v2에서 사용 가능함
+    shm_size: '2gb'   # 공유 메모리 크기 (PyTorch DataLoader에 필요)
+    mem_limit: 8g     # 최대 메모리 제한 (8GB)
+    memswap_limit: 8g # 스왑 메모리 제한
     networks:
       - matchit_network
     restart: unless-stopped

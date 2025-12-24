@@ -15,13 +15,13 @@ logger = logging.getLogger(__name__)
 
 @router.get('/')
 def search(
-	keyword: Optional[str] = Query(None, description="검색 키워드"),
-	skills: Optional[List[str]] = Query(None, description="기술 스택 필터 (배열)"),
-	source: Optional[str] = Query(None, description="항목 필터: 전체/채용/부트캠프"),
-	career_level_id: Optional[int] = Query(None, description="커리어 레벨 ID"),
-	experience_range_id: Optional[int] = Query(None, description="경력 구간 ID"),
-	limit: int = Query(20, ge=1, le=100, description="최대 반환 개수"),
-	random_order: bool = Query(False, description="랜덤 정렬 여부"),
+	keyword: Optional[str] = Query(None, description = "검색 키워드"),
+	skills: Optional[List[str]] = Query(None, description = "기술 스택 필터 (배열)"),
+	source: Optional[str] = Query(None, description = "항목 필터: 전체/채용/부트캠프"),
+	career_level_id: Optional[int] = Query(None, description = "커리어 레벨 ID"),
+	experience_range_id: Optional[int] = Query(None, description = "경력 구간 ID"),
+	limit: int = Query(20, ge=1, le=100, description = "최대 반환 개수"),
+	random_order: bool = Query(False, description = "랜덤 정렬 여부"),
 	db: Session = Depends(get_db),
 ):
 	"""
@@ -124,6 +124,7 @@ def search(
 			# PostgreSQL/SQLite의 경우 func.random(), MySQL의 경우 func.rand() 사용
 			# 대부분의 DB에서 func.random()을 지원하므로 사용
 			jobs_q = jobs_q.order_by(func.random())
+
 		
 		jobs_q = jobs_q.limit(limit)
 		jobs = [job_to_dict(j) for j in jobs_q.all()]

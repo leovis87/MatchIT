@@ -198,35 +198,6 @@ const BootcampsPage = () => {
     fetchBootcamps()
   }, [currentPage, itemsPerPage, showExpired, sort, selectedModes, selectedFunding, selectedFields]) // ✅ sort가 바뀔 때마다 다시 호출
 
-  /**
-   * ❌ 더 이상 사용 안함: 필터 옵션은 allFields, allModes, allFundings 사용
-   *
-   * 서버에서 별도로 필터 옵션을 가져오므로
-   * 현재 페이지의 bootcamps 데이터로 필터 옵션을 생성할 필요 없음
-   */
-  // const fields = useMemo(() => {
-  //   return Array.from(new Set(bootcamps.map(b => b.field))).sort()
-  // }, [bootcamps])
-  //
-  // const modes = useMemo(() => {
-  //   return Array.from(new Set(bootcamps.map(b => b.mode)))
-  // }, [bootcamps]) as Bootcamp['mode'][]
-  //
-  // const fundings = useMemo(() => {
-  //   return Array.from(new Set(bootcamps.map(b => b.funding)))
-  // }, [bootcamps]) as Bootcamp['funding'][]
-  // const dynamicFields = useMemo(() => {
-  //   return Array.from(new Set(bootcamps.map(b => b.field))).sort()
-  // }, [bootcamps])
-
-  // const dynamicModes = useMemo(() => {
-  //   return Array.from(new Set(bootcamps.map(b => b.mode)))
-  // }, [bootcamps])
-
-  // const dynamicFundings = useMemo(() => {
-  //   return Array.from(new Set(bootcamps.map(b => b.funding)))
-  // }, [bootcamps])
-  // const [selectedLevels, setSelectedLevels] = useState<Set<Bootcamp['level']>>(new Set())
   const getInitialCompare = () => {
     try {
       if (typeof window === 'undefined') return []
@@ -281,77 +252,13 @@ const BootcampsPage = () => {
     setCurrentPage(1)
   }
 
-  /**
-   * ❌ 더 이상 사용 안함: 클라이언트 사이드 필터링
-   *
-   * 서버 사이드 필터링을 사용하므로 클라이언트에서 따로 필터링할 필요 없음
-   * 서버에 필터 조건을 전달하면 이미 필터링된 결과를 받아옴
-   */
-  // const filteredBootcamps = useMemo(() => {
-  //   return bootcamps.filter((boot) => {
-  //     const fieldMatch = selectedFields.size ? selectedFields.has(boot.field) : true
-  //     const modeMatch = selectedModes.size ? selectedModes.has(boot.mode) : true
-  //     const fundingMatch = selectedFunding.size ? selectedFunding.has(boot.funding) : true
-  //
-  //     const expiredMatch = showExpired ? true : !isExpired(boot.closeDate)
-  //
-  //     return fieldMatch && modeMatch && fundingMatch && expiredMatch
-  //   })
-  // }, [bootcamps, selectedFields, selectedFunding, selectedModes, showExpired])
-
-  /**
-   * 필터가 변경되면 첫 페이지로 이동
-   *
-   * 사용자가 필터를 변경하면 결과가 달라지므로 1페이지로 리셋합니다.
-   * 예: 3페이지에 있다가 필터를 변경했는데 결과가 10개밖에 없으면 빈 페이지가 표시될 수 있음
-   */
   useEffect(() => {
     setCurrentPage(1)
   }, [selectedFields, selectedModes, selectedFunding])
 
-  /**
-   * 페이지네이션 계산
-   *
-   * totalPages: 전체 페이지 수 (올림)
-   *   - 예: 25개 항목 / 10 = 2.5 → Math.ceil(2.5) = 3페이지
-   *
-   * startIndex: 현재 페이지의 첫 번째 항목 인덱스 (0부터 시작)
-   *   - 예: 2페이지 → (2-1) * 10 = 10번 인덱스부터
-   *
-   * endIndex: 현재 페이지의 마지막 항목 인덱스 + 1
-   *   - 예: 10 + 10 = 20 (slice는 endIndex 미포함이므로 10~19번 인덱스)
-   *
-   * currentBootcamps: 현재 페이지에 표시할 부트캠프 배열
-   *   - slice(10, 20) → 10번~19번 인덱스의 항목 (총 10개)
-   */
   const totalPages = Math.ceil(total / itemsPerPage)
   const currentBootcamps = bootcamps // 🛠️ slice 필요없음
-  /**
-   * 하단 부분은
-   * 서버 연결 없이 페이지네이션 기능을
-   * 검증할 때 사용함
-   */
-  // const totalPages = Math.ceil(filteredBootcamps.length / itemsPerPage) // 클라이언트 페이지네이션
-  // const startIndex = (currentPage - 1) * itemsPerPage // 클라이언트 페이지네이션
-  // const endIndex = startIndex + itemsPerPage // 클라이언트 페이지네이션
-  // const totalPages = Math.ceil(filteredBootcamps.length / itemsPerPage) // 클라이언트 페이지네이션
-  // const currentBootcamps = filteredBootcamps.slice(startIndex, endIndex) // 클라이언트 페이지네이션
 
-
-  /**
-   * 페이지 번호 배열 생성
-   *
-   * 페이지가 많을 때 모든 번호를 표시하지 않고 스마트하게 축약합니다.
-   * -1은 "..." (생략 표시)를 의미합니다.
-   *
-   * 표시 패턴:
-   * - 전체 5페이지 이하: [1] 2 3 4 5
-   * - 현재 페이지 1~3: [1] 2 3 4 ... 20
-   * - 현재 페이지 중간: 1 ... 9 [10] 11 ... 20
-   * - 현재 페이지 끝: 1 ... 17 18 19 [20]
-   *
-   * maxVisible을 변경하여 표시할 버튼 개수를 조절할 수 있습니다.
-   */
   const getPageNumbers = () => {
     const pages: number[] = []
     const maxVisible = 5

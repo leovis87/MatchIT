@@ -1,6 +1,7 @@
 import { Outlet, Route, Routes } from 'react-router-dom'
 import Footer from './components/Footer'
 import Header from './components/Header'
+import ChatbotModal from './components/ChatbotModal_streaming'
 import BootcampsPage from './pages/Bootcamps'
 import BootcampDetailPage from './pages/BootcampDetail'
 import ComparePage from './pages/Compare'
@@ -21,6 +22,7 @@ const Layout = () => {
         <Outlet />
       </main>
       <Footer />
+      <ChatbotModal />
     </div>
   )
 }
@@ -32,13 +34,17 @@ function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/jobs" element={<JobsPage />} />
         <Route path="/jobs/:jobId" element={<JobDetail />} />
+
         <Route path="/bootcamps" element={<BootcampsPage />} />
         <Route path="/bootcamps/:id" element={<BootcampDetailPage />} />
+
         <Route path="/search" element={<SearchResultsPage />} />
         <Route path="/compare" element={<ComparePage />} />
+
         <Route path="/login" element={<LoginPage />} />
         <Route path="/callback" element={<CallbackPage />} />
         <Route path="/profile" element={<ProfilePage />} />
+
         <Route path="*" element={<HomePage />} />
       </Route>
     </Routes>

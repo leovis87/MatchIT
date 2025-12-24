@@ -32,14 +32,17 @@ const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
 const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const [user, setUser] = useState<{ id?: number; name?: string; email?: string; role?: string } | null>(null)
 
   const checkLoginStatus = useCallback(async () => {
     try {
       const result = await authApi.getCurrentUser()
       setIsLoggedIn(result.isLoggedIn === true)
+      setUser(result.user || null)
     } catch (error) {
       console.error('Error checking login status:', error)
       setIsLoggedIn(false)
+      setUser(null)
     }
   }, [])
 
@@ -117,6 +120,20 @@ const Header = () => {
               {item.label}
             </NavLink>
           ))}
+          {/* 관리자 메뉴 - role이 admin일 때만 표시 */}
+          {user?.role === 'admin' && (
+            <NavLink
+              to="/admin"
+              className={({ isActive }) =>
+                [
+                  'transition-colors hover:text-amber-600',
+                  isActive ? 'text-amber-600 font-semibold' : 'text-slate-700',
+                ].join(' ')
+              }
+            >
+              🔧 관리자
+            </NavLink>
+          )}
         </nav>
 
         <div className="flex items-center gap-2">

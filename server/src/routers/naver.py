@@ -8,7 +8,7 @@ from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from sqlalchemy.orm import Session
 from src.database import get_db
 from datetime import datetime, timedelta
-from src.models import User, SocialLogin, UserSession
+from src.models import User, SocialLogin, UserSession, Role
 from typing import Optional
 
 ENV_PATH = Path(__file__).parent.parent.parent / '.env'
@@ -31,10 +31,10 @@ async def naver_login():
     naver_url = (
         "https://nid.naver.com/oauth2.0/authorize"
         f"?response_type=code"
-        f"&client_id={NAVER_CLIENT_ID}"
-        f"&redirect_uri={NAVER_REDIRECT_URI}"
-        f"&state={state}"
-        f"&auth_type=reprompt"                      # 👈 자동로그인 방지
+        f"&client_id = {NAVER_CLIENT_ID}"
+        f"&redirect_uri = {NAVER_REDIRECT_URI}"
+        f"&state = {state}"
+        f"&auth_type = reprompt"                      # 👈 자동로그인 방지
     )
     return RedirectResponse(url=naver_url)
 
@@ -114,26 +114,29 @@ async def naver_callback(code: str, state: str, db: Session = Depends(get_db)):
         else:
             # 신규 가입
             user = db.query(User).filter(User.Email == naver_email).first()
+            user_role = db.query(Role).filter(Role.Name == "user").first()
 
             if not user:
                 user = User(
-                    Email=naver_email if naver_email else f"naver_{naver_id}@no-email.com",
-                    Name=naver_name,
+                    Email = naver_email if naver_email else f"naver_{naver_id}@no-email.com",
+                    Name = naver_name,
+                    role = user_role,
                 )
                 db.add(user)
                 db.flush()
                 newly_created = True
 
             new_oauth = SocialLogin(
-                UserID=user.UserID,
-                Provider="Naver",
-                ProviderUserID=str(naver_id),
-                LinkedAt=datetime.now(),
-                UnlinkedAt=None,
+                UserID = user.UserID,
+                Provider = "Naver",
+                ProviderUserID = str(naver_id),
+                LinkedAt = datetime.now(),
+                UnlinkedAt = None,
             )
             db.add(new_oauth)
 
         db.commit()
+        # role 정보 로드
         db.refresh(user)
 
     except Exception as e:
@@ -148,11 +151,11 @@ async def naver_callback(code: str, state: str, db: Session = Depends(get_db)):
         expires_at = datetime.now() + timedelta(seconds=expires_in)
 
         session = UserSession(
-            SessionID=session_id,
-            UserID=user.UserID,
-            AccessToken=access_token,
-            RefreshToken=refresh_token,
-            ExpiresAt=expires_at,
+            SessionID = session_id,
+            UserID = user.UserID,
+            AccessToken = access_token,
+            RefreshToken = refresh_token,
+            ExpiresAt = expires_at,
         )
         db.add(session)
         db.commit()
@@ -232,7 +235,12 @@ async def naver_me(
 
     return {
         "isLoggedIn": True,
-        "user": {"id": user.UserID, "name": user.Name, "email": user.Email},
+        "user": {
+            "id": user.UserID,
+            "name": user.Name,
+            "email": user.Email,
+            "role": user.role.Name if user.role else "user",
+        },
     }
 
 
@@ -260,7 +268,7 @@ async def naver_logout(
                 "service_provider": "NAVER",
             }
             async with httpx.AsyncClient() as client:
-                await client.post(logout_url, params=params)
+                await client.post(logout_url, params = params)
         except:
             pass
 
@@ -273,7 +281,7 @@ async def naver_logout(
         resp.delete_cookie("user_id", **opt)
         resp.delete_cookie("naver_access_token", **opt)
         resp.delete_cookie("naver_refresh_token", **opt)
-        resp.delete_cookie("is_login", path="/", max_age=0, httponly=False)
+        resp.delete_cookie("is_login", path="/", max_age = 0, httponly=False)
         return resp
 
     # DB 세션 삭제

@@ -96,6 +96,54 @@ class UserCreateFromSocial(BaseModel):
     provider_user_id: str  # 카카오 ID
     # Password 없음!
 
+
+##################################################################################
+# === Admin 관련 ===
+##################################################################################
+class UserOut(BaseModel):
+    userid: int
+    email: str
+    name: Optional[str]
+    role: int  # 1 for user, 2 for admin
+
+    class Config:
+        from_attributes = True
+
+
+class UserRoleUpdate(BaseModel):
+    roleid: int  # 1 for user, 2 for admin
+
+
+class JobPostOut(BaseModel):
+    jobid: int
+    jobtitle: str
+    company: Optional[str]
+    jobdescription: Optional[str]
+
+    class Config:
+        from_attributes = True
+
+class JobPostUpdate(BaseModel):
+    jobtitle: Optional[str] = None
+    jobdescription: Optional[str] = None
+
+
+class BootcampOut(BaseModel):
+    bootcampid: int
+    bootcampname: str
+    institution: Optional[str] = None
+    description: Optional[str] = None
+
+    class Config:
+        from_attributes = True
+
+
+class BootcampUpdate(BaseModel):
+    bootcampname: Optional[str] = None
+    institution: Optional[str] = None
+    description: Optional[str] = None
+
+
 ##################################################################################
 # === POST ===
 ##################################################################################

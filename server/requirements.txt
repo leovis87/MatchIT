@@ -20,4 +20,20 @@ pydantic>=2.12.4                        # 데이터 검증 및 설정 모델 정
 python-dotenv>=1.2.1                    # .env 환경 변수 로딩 라이브러리
 
 # jwt token
-python-jose>=3.3.0                      # JWT 생성/검증 라이브러리 (jose)
+python-jose>=3.3.0                      # JWT 생성/검증 라이브러리 (jose)            
+
+# AI Libraries
+torch>=2.5.0                            # Deeplearning
+transformers>=4.46.0                    # Gemma, BERT, KcBERT 등 사전학습 모델 사용
+sentence-transformers>=5.0.0
+huggingface-hub>=0.20.0
+peft>=0.12.0                            # LoRA(Fine Tuning 결과)를 베이스 모델에 적용
+accelerate>=0.34.0                      # 모델을 GPU/CPU에 자동 배치
+bitsandbytes>=0.43.0                    # 모델을 4bit로 압축 메모리 절약 (2GB -> 500MB)
+sentencepiece>=0.2.0
+
+# HTTP Client
+httpx>=0.24.0                           # 비동기 HTTP 클라이언트
+
+# LLM api
+anthropic>=0.75.0                       # Claude API

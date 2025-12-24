@@ -2,6 +2,7 @@ import { type ReactNode, useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { skillsApi, metaApi, searchApi } from '../services/apiService'
 
+
 // 아이콘 SVG 컴포넌트 (의존성 제거를 위해 인라인 정의)
 const SearchIcon = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -74,6 +75,10 @@ const HomePage = () => {
   const [careerLevels, setCareerLevels] = useState<any[]>([])
   const [experienceRanges, setExperienceRanges] = useState<any[]>([])
   const [loadingMeta, setLoadingMeta] = useState(true)
+
+  // Stats for job posts and bootcamps
+  const [jobCount, setJobCount] = useState<number>(0)
+  const [bootcampCount, setBootcampCount] = useState<number>(0)
 
   const [selectedSource, setSelectedSource] = useState<'전체' | '채용'|'부트캠프'>('전체')
   const [selectedCareerLevelId, setSelectedCareerLevelId] = useState<number | null>(null)

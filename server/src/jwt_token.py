@@ -1,10 +1,11 @@
 from jose import jwt, JWTError
 from datetime import datetime, timedelta, timezone
+import os
 
 # JWT => HEADER.PAYLOAD.SIGNATURE
 
 ALG = 'HS256' # 암호화 알고리즘 
-SECRET = "my-secret"
+SECRET = os.getenv("JWT_SECRET", "my-secret")
 # HACKER = "secret"
 
 def create_token(user_info):

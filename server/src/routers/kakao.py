@@ -148,6 +148,9 @@ async def kakao_callback(code: str, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(user)
 
+        # role 정보 로드
+        db.refresh(user, ["role"])
+
     except Exception as e:
         db.rollback()
         logger.exception("DB 처리 중 예외 발생")
@@ -207,10 +210,10 @@ async def kakao_callback(code: str, db: Session = Depends(get_db)):
     response.set_cookie(
         "is_login",
         "true",
-        httponly=False,
-        secure=False,
-        samesite="lax",
-        path="/",
+        httponly = False,
+        secure = False,
+        samesite = "lax",
+        path = "/",
     )
 
     return response
@@ -225,8 +228,10 @@ async def get_current_user(
     session_id: Optional[str] = Cookie(None),
     db: Session = Depends(get_db),
 ):
+    logger.info(f"get_current_user called with user_id: {user_id}, session_id: {session_id}")
 
     if not user_id or not session_id:
+        logger.info("Missing user_id or session_id")
         return {"isLoggedIn": False, "user": None}
 
     try:
@@ -240,9 +245,11 @@ async def get_current_user(
         )
 
         if not session:
+            logger.info("Session not found in DB")
             return {"isLoggedIn": False, "user": None}
 
         if session.ExpiresAt < datetime.now():
+            logger.info("Session expired")
             db.delete(session)
             db.commit()
             return {"isLoggedIn": False, "user": None}
@@ -250,6 +257,11 @@ async def get_current_user(
         user = db.query(User).filter(User.UserID == int(user_id)).first()
         if not user:
             return {"isLoggedIn": False, "user": None}
+
+        # role 정보 로드
+        db.refresh(user, ["role"])
+
+        logger.info(f"User authenticated: {user.Name}, role: {user.role.Name if user.role else 'user'}")
 
         return {
             "isLoggedIn": True,
@@ -261,6 +273,7 @@ async def get_current_user(
         }
 
     except Exception:
+        logger.error(f"Error in get_current_user: {e}")
         return {"isLoggedIn": False, "user": None}
 
 

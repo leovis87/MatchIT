@@ -174,12 +174,6 @@ def get_current_user(db: Session = _Depends(get_db), user_id: Optional[str] = Co
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"세션 검증 중 오류: {e}")
 
-@router.get("/me", response_model=ProfileOut)
-def get_my_profile(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
-    """현재 로그인한 사용자의 프로필 조회"""
-    return read_profile(current_user.UserID, db)
-
-
 @router.get("/{user_id}", response_model=ProfileOut)
 def read_profile(user_id: int, db: Session = Depends(get_db)):
     user = get_user_data(db, user_id)
